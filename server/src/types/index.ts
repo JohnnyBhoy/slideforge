@@ -57,6 +57,10 @@ export interface IPendingPayment extends Document {
 
 export interface AuthRequest extends Request {
   user?: (IUser | IAdmin) & { role: string };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  body: any;
+  params: Record<string, string>;
+  query: Record<string, string | string[] | undefined>;
 }
 
 export interface QuizQuestion {
