@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.env
+*.env.local
+
+# Generated PPTX files
+server/public/generated/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
