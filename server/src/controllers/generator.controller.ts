@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import GuestSession from '../models/GuestSession';
 import Generation from '../models/Generation';
 import User from '../models/User';
-import { generateSlides } from '../services/openai.service';
+import { generateSlides } from '../services/anthropic';
 import { generatePptx } from '../services/pptx.service';
 import { AuthRequest } from '../types';
 

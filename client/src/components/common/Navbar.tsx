@@ -19,8 +19,8 @@ const Navbar: React.FC = () => {
   return (
     <nav className="bg-white border-b border-slate-200 px-4 md:px-8 py-3 flex items-center justify-between sticky top-0 z-40">
       <Link to="/" className="flex items-center gap-2 font-bold text-blue-700 text-lg">
-        <span className="text-2xl">🎓</span>
-        <span>Class Generator</span>
+        <img src='/slide_forge.png' alt="slideforge" className='h-12'/>
+        <span>Slide Forge</span>
       </Link>
 
       <div className="flex items-center gap-3">

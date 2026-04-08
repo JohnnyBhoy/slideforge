@@ -59,9 +59,19 @@ export interface AuthRequest extends Request {
   user?: (IUser | IAdmin) & { role: string };
 }
 
+export interface QuizQuestion {
+  question: string;
+  options: string[]; // exactly 4: ["A. ...", "B. ...", "C. ...", "D. ..."]
+  answer: string;    // "A", "B", "C", or "D"
+}
+
 export interface SlideContent {
   slideNumber: number;
+  type: 'title' | 'content' | 'quiz' | 'summary';
   title: string;
   bullets: string[];
+  keyFact: string;
+  imageKeyword: string;
   speakerNotes: string;
+  quizQuestions?: QuizQuestion[];
 }
