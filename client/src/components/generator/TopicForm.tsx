@@ -60,13 +60,13 @@ const TopicForm: React.FC<TopicFormProps> = ({ onResult }) => {
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
           <label className="block text-slate-700 font-semibold mb-2">
-            What topic do you want to teach?
+            What is your report or presentation topic?
           </label>
           <textarea
             rows={4}
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
-            placeholder="e.g. Planets and the Solar System, World War II, Photosynthesis, The Water Cycle, Fractions and Decimals..."
+            placeholder="e.g. The Solar System, World War II, Photosynthesis, The Water Cycle, The French Revolution, Climate Change..."
             className="w-full border border-slate-300 rounded-xl px-4 py-3 text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
             disabled={isGenerating || isLimitReached}
           />
@@ -94,7 +94,7 @@ const TopicForm: React.FC<TopicFormProps> = ({ onResult }) => {
 
         <div className="flex items-center justify-between text-sm text-slate-500 bg-slate-50 rounded-lg px-4 py-2">
           <span>Slides generated</span>
-          <span className="font-semibold text-slate-700">10 slides</span>
+          <span className="font-semibold text-slate-700">12–16 slides + quiz</span>
         </div>
 
         <button
@@ -111,13 +111,13 @@ const TopicForm: React.FC<TopicFormProps> = ({ onResult }) => {
 
         {!role && (
           <p className="text-center text-sm text-slate-500">
-            Sign in with Google after your free tries to get 5 more
+            Sign in with Google after your free tries to unlock 5 more presentations
           </p>
         )}
       </form>
 
       <div className="mt-5">
-        <p className="text-xs text-slate-500 mb-2 font-medium uppercase tracking-wide">Sample Topics</p>
+        <p className="text-xs text-slate-500 mb-2 font-medium uppercase tracking-wide">Try one of these topics</p>
         <div className="flex flex-wrap gap-2">
           {SAMPLE_TOPICS.map((t) => (
             <button

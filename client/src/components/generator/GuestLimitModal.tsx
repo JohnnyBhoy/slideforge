@@ -10,13 +10,15 @@ const GuestLimitModal: React.FC<GuestLimitModalProps> = ({ isOpen }) => {
   return (
     <Modal isOpen={isOpen} dismissable={false}>
       <div className="text-center">
-        <div className="text-5xl mb-4">🔒</div>
+        <div className="text-5xl mb-4">🎓</div>
         <h2 className="text-2xl font-bold text-slate-800 mb-3">
-          You've used your 3 free tries!
+          You've used your 3 free presentations!
         </h2>
-        <p className="text-slate-600 mb-6">
-          Sign in with Google to get 5 more free generations.
-          No payment required — just your Google account.
+        <p className="text-slate-600 mb-2">
+          Sign in with Google to get <strong>5 more free presentations</strong> — no payment needed.
+        </p>
+        <p className="text-slate-400 text-sm mb-6">
+          Your account also unlocks presentation history so you can re-download any past slideshow.
         </p>
         <a
           href={getGoogleAuthUrl()}

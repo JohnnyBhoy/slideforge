@@ -37,9 +37,9 @@ const AdminLogin: React.FC = () => {
     <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <span className="text-4xl">🎓</span>
-          <h1 className="text-2xl font-bold text-slate-800 mt-2">Admin Login</h1>
-          <p className="text-slate-500 text-sm">Class Generator Administration</p>
+          <img src="/slide_forge.png" alt="Slide Forge" className="h-14 mx-auto mb-3" />
+          <h1 className="text-2xl font-bold text-slate-800">Admin Login</h1>
+          <p className="text-slate-500 text-sm mt-1">Slide Forge Administration Panel</p>
         </div>
 
         <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
@@ -49,7 +49,7 @@ const AdminLogin: React.FC = () => {
               <input
                 type="email"
                 {...register('email')}
-                placeholder="admin@classgenerator.app"
+                placeholder="admin@slideforge.com"
                 className="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}

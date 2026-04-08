@@ -12,28 +12,32 @@ import { GenerationResult } from '../../types';
 
 const FAQ_ITEMS = [
   {
-    q: 'How does the free trial work?',
-    a: 'Guests get 3 free presentations. After signing in with Google, teachers get 5 free generations per billing cycle.',
+    q: 'Who can use SlideForge?',
+    a: 'Anyone — students, teachers, and presenters. Guests get 3 free presentations. Teachers who sign in with Google get 5 free generations per billing cycle.',
   },
   {
-    q: 'What does the generated PowerPoint look like?',
-    a: 'A 10-slide, professionally styled presentation with title slide, content slides, and a summary slide — ready to download and edit.',
+    q: 'What does the generated presentation look like?',
+    a: 'A professionally designed .pptx file with a title slide, detailed content slides, a quiz slide to test understanding, and a summary slide — ready to open in PowerPoint, Google Slides, or LibreOffice.',
   },
   {
-    q: 'How do I subscribe?',
-    a: 'After using your 5 free generations, a subscription modal will appear with GCash payment instructions.',
+    q: 'How many slides will my presentation have?',
+    a: 'Between 12 and 16 slides depending on the topic — including a knowledge-check quiz near the end and a summary of key takeaways.',
+  },
+  {
+    q: 'How do I subscribe for unlimited presentations?',
+    a: 'After using your 5 free generations, a subscription option will appear with GCash payment instructions. Once confirmed by our team, your account gets unlimited access.',
   },
   {
     q: 'How long until my subscription is activated?',
-    a: 'Typically within 24 hours after you click "I\'ve Paid" and our admin confirms your payment.',
+    a: 'Typically within 24 hours after you click "I\'ve Paid" and our team confirms your payment.',
   },
   {
     q: 'Can I edit the downloaded file?',
-    a: 'Yes! The file is a standard .pptx format that works in Microsoft PowerPoint, Google Slides, and LibreOffice.',
+    a: 'Yes! The file is a standard .pptx format. Open it in Microsoft PowerPoint, Google Slides, or LibreOffice and edit freely — change colors, add images, adjust text.',
   },
   {
     q: 'What grade levels are supported?',
-    a: 'Kinder, Elementary, High School, and College — each with AI content tailored to the appropriate level.',
+    a: 'Kinder, Elementary, High School, and College. The language, depth, and examples are automatically adjusted to match the selected level.',
   },
 ];
 
@@ -46,15 +50,11 @@ const LandingPage: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading && role === 'admin') {
-      navigate('/admin', { replace: true });
-    }
+    if (!loading && role === 'admin') navigate('/admin', { replace: true });
   }, [role, loading, navigate]);
 
   useEffect(() => {
-    if (role === 'teacher' && isLimitReached) {
-      setShowTeacherModal(true);
-    }
+    if (role === 'teacher' && isLimitReached) setShowTeacherModal(true);
   }, [isLimitReached, role]);
 
   const handleResult = (r: GenerationResult & { topic: string; gradeLevel: string }) => {
@@ -67,65 +67,99 @@ const LandingPage: React.FC = () => {
       <Navbar />
 
       {/* Hero */}
-      <section className="text-center py-16 px-4">
+      <section className="text-center py-14 px-4 bg-gradient-to-b from-blue-50 to-[#F8FAFC]">
         <div className="max-w-3xl mx-auto">
-          <div className="mb-4">
+          <div className="mb-5">
             <TryCounter remainingTries={remainingTries} isSubscribed={isSubscribed} role={role} />
           </div>
           <h1 className="text-4xl md:text-5xl font-extrabold text-slate-800 leading-tight mb-4">
-            Generate Classroom Presentations{' '}
-            <span className="text-blue-700">in Seconds</span>
+            Turn Any Topic Into a{' '}
+            <span className="text-blue-700">Ready-to-Present Slideshow</span>
           </h1>
-          <p className="text-lg text-slate-600 mb-8">
-            Type your lesson topic and get a ready-to-download PowerPoint — instantly.
-            No design skills needed.
+          <p className="text-lg text-slate-500 mb-3 max-w-xl mx-auto">
+            Perfect for school reports, class presentations, and teaching materials.
+            Type your topic, pick your grade level, and download a complete presentation in seconds.
           </p>
+          <div className="flex flex-wrap justify-center gap-2 text-xs text-slate-500 mb-6">
+            <span className="bg-white border border-slate-200 rounded-full px-3 py-1">📄 12–16 slides</span>
+            <span className="bg-white border border-slate-200 rounded-full px-3 py-1">🖼️ Topic-matched images</span>
+            <span className="bg-white border border-slate-200 rounded-full px-3 py-1">🎯 Built-in quiz</span>
+            <span className="bg-white border border-slate-200 rounded-full px-3 py-1">✏️ Fully editable .pptx</span>
+            <span className="bg-white border border-slate-200 rounded-full px-3 py-1">🎓 Kinder to College</span>
+          </div>
         </div>
       </section>
 
       {/* Generator Form */}
-      <section className="px-4 pb-8">
+      <section className="px-4 pb-10 -mt-4">
         <TopicForm onResult={handleResult} />
-
         {result && (
           <DownloadCard
             result={result}
-            onGenerateAnother={() => {
-              setResult(null);
-              setLastGeneration(null);
-            }}
+            onGenerateAnother={() => { setResult(null); setLastGeneration(null); }}
           />
         )}
       </section>
 
-      {/* Features */}
-      <section className="bg-white py-16 px-4">
+      {/* How it works */}
+      <section className="bg-white py-14 px-4 border-t border-slate-100">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-2xl font-bold text-center text-slate-800 mb-10">
-            Why Teachers Love Class Generator
-          </h2>
+          <h2 className="text-2xl font-bold text-center text-slate-800 mb-2">How It Works</h2>
+          <p className="text-center text-slate-500 text-sm mb-10">Three steps to a complete presentation</p>
           <div className="grid md:grid-cols-3 gap-6">
             {[
               {
-                icon: '🤖',
-                title: 'AI-Powered Content',
-                desc: 'OpenAI generates educator-quality slide text for any topic.',
+                step: '1',
+                icon: '✏️',
+                title: 'Type Your Topic',
+                desc: 'Enter any subject — a history event, a science concept, a book report, anything you need to present.',
               },
               {
-                icon: '⚡',
-                title: 'Instant Download',
-                desc: 'Ready in seconds, standard PPTX format you can open anywhere.',
+                step: '2',
+                icon: '⚙️',
+                title: 'Pick Grade Level',
+                desc: 'Select Kinder, Elementary, High School, or College. The content and language adjust automatically.',
               },
               {
-                icon: '🎓',
-                title: 'Teacher-Friendly',
-                desc: 'No design skills needed — just type your topic and download.',
+                step: '3',
+                icon: '⬇️',
+                title: 'Download & Present',
+                desc: 'Get a fully designed .pptx file with images, a quiz, and speaker notes — open it in any app and present.',
               },
+            ].map((s) => (
+              <div key={s.step} className="text-center p-6 rounded-2xl bg-blue-50 border border-blue-100 relative">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-7 h-7 rounded-full bg-blue-700 text-white text-xs font-bold flex items-center justify-center">
+                  {s.step}
+                </div>
+                <div className="text-4xl mb-3 mt-2">{s.icon}</div>
+                <h3 className="font-bold text-slate-800 mb-2">{s.title}</h3>
+                <p className="text-slate-500 text-sm">{s.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* What's included */}
+      <section className="py-14 px-4 bg-[#F8FAFC]">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-2xl font-bold text-center text-slate-800 mb-2">What Every Presentation Includes</h2>
+          <p className="text-center text-slate-500 text-sm mb-10">A complete, structured slideshow — not just bullet points</p>
+          <div className="grid md:grid-cols-2 gap-4">
+            {[
+              { icon: '🏷️', title: 'Title Slide', desc: 'A clean opening slide with your topic, grade level, and a relevant cover image.' },
+              { icon: '📚', title: 'Content Slides', desc: '10–13 information slides, each with 4 key points, a real photo, and a highlighted fact.' },
+              { icon: '🎯', title: 'Quiz Slide', desc: '4 multiple-choice questions to test understanding — answers in the speaker notes.' },
+              { icon: '✅', title: 'Summary Slide', desc: 'A closing slide recapping the 4 most important takeaways from the presentation.' },
+              { icon: '🗒️', title: 'Speaker Notes', desc: 'Every slide has teacher/presenter notes with elaboration tips — not shown to the audience.' },
+              { icon: '✏️', title: 'Fully Editable', desc: 'Standard .pptx format — edit colors, text, images, or layout in any app you prefer.' },
             ].map((f) => (
-              <div key={f.title} className="text-center p-6 rounded-xl bg-blue-50">
-                <div className="text-4xl mb-3">{f.icon}</div>
-                <h3 className="font-bold text-slate-800 mb-2">{f.title}</h3>
-                <p className="text-slate-600 text-sm">{f.desc}</p>
+              <div key={f.title} className="flex gap-4 bg-white rounded-xl border border-slate-200 p-4">
+                <div className="text-2xl flex-shrink-0">{f.icon}</div>
+                <div>
+                  <p className="font-semibold text-slate-800 text-sm">{f.title}</p>
+                  <p className="text-slate-500 text-sm mt-0.5">{f.desc}</p>
+                </div>
               </div>
             ))}
           </div>
@@ -133,23 +167,21 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* FAQ */}
-      <section className="py-16 px-4">
+      <section className="bg-white py-14 px-4 border-t border-slate-100">
         <div className="max-w-2xl mx-auto">
-          <h2 className="text-2xl font-bold text-center text-slate-800 mb-8">
-            Frequently Asked Questions
-          </h2>
+          <h2 className="text-2xl font-bold text-center text-slate-800 mb-8">Frequently Asked Questions</h2>
           <div className="space-y-3">
             {FAQ_ITEMS.map((item, i) => (
-              <div key={i} className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+              <div key={i} className="rounded-xl border border-slate-200 overflow-hidden">
                 <button
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  className="w-full text-left px-5 py-4 font-semibold text-slate-700 flex justify-between items-center hover:bg-slate-50"
+                  className="w-full text-left px-5 py-4 font-semibold text-slate-700 flex justify-between items-center hover:bg-slate-50 text-sm"
                 >
                   {item.q}
-                  <span className="text-blue-700 ml-2">{openFaq === i ? '−' : '+'}</span>
+                  <span className="text-blue-700 ml-4 text-lg flex-shrink-0">{openFaq === i ? '−' : '+'}</span>
                 </button>
                 {openFaq === i && (
-                  <div className="px-5 pb-4 text-slate-600 text-sm">{item.a}</div>
+                  <div className="px-5 pb-4 text-slate-500 text-sm border-t border-slate-100 pt-3">{item.a}</div>
                 )}
               </div>
             ))}
@@ -158,30 +190,24 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-slate-800 text-slate-300 py-8 px-4">
+      <footer className="bg-slate-900 text-slate-400 py-8 px-4">
         <div className="max-w-4xl mx-auto text-center">
           <div className="flex items-center justify-center gap-2 mb-2">
-            <span className="text-xl">🎓</span>
-            <span className="font-bold text-white">Class Generator</span>
+            <span className="font-bold text-white text-lg">Slide Forge</span>
           </div>
-          <p className="text-sm text-slate-400 mb-4">
-            AI presentations for every classroom
-          </p>
+          <p className="text-sm mb-4">Presentation tool for students, teachers, and presenters.</p>
           <div className="flex justify-center gap-6 text-sm mb-4">
             <a href="#" className="hover:text-white transition">Privacy Policy</a>
             <a href="#" className="hover:text-white transition">Terms of Use</a>
             <a href="#" className="hover:text-white transition">Contact</a>
           </div>
-          <p className="text-xs text-slate-500">© 2025 Class Generator</p>
+          <p className="text-xs text-slate-600">© {new Date().getFullYear()} Slide Forge. All rights reserved.</p>
         </div>
       </footer>
 
       {/* Modals */}
       <GuestLimitModal isOpen={!role && isLimitReached} />
-      <TeacherLimitModal
-        isOpen={showTeacherModal}
-        onClose={() => setShowTeacherModal(false)}
-      />
+      <TeacherLimitModal isOpen={showTeacherModal} onClose={() => setShowTeacherModal(false)} />
     </div>
   );
 };
