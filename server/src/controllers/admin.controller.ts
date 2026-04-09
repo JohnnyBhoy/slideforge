@@ -17,6 +17,72 @@ export const getStats = async (_req: AuthRequest, res: Response): Promise<void> 
   res.json({ success: true, totalTeachers, activeTeachers, subscribedTeachers, totalGenerations, totalGuestGenerations });
 };
 
+export const getDailyStats = async (_req: AuthRequest, res: Response): Promise<void> => {
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 29);
+  thirtyDaysAgo.setHours(0, 0, 0, 0);
+
+  const raw = await Generation.aggregate([
+    { $match: { createdAt: { $gte: thirtyDaysAgo } } },
+    {
+      $group: {
+        _id: {
+          year: { $year: '$createdAt' },
+          month: { $month: '$createdAt' },
+          day: { $dayOfMonth: '$createdAt' },
+        },
+        count: { $sum: 1 },
+      },
+    },
+    { $sort: { '_id.year': 1, '_id.month': 1, '_id.day': 1 } },
+  ]);
+
+  const map: Record<string, number> = {};
+  raw.forEach((r) => {
+    const d = new Date(r._id.year, r._id.month - 1, r._id.day);
+    map[d.toISOString().slice(0, 10)] = r.count;
+  });
+
+  const days = [];
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const key = d.toISOString().slice(0, 10);
+    days.push({
+      date: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      generations: map[key] || 0,
+    });
+  }
+
+  res.json({ success: true, days });
+};
+
+export const getPaymentStats = async (_req: AuthRequest, res: Response): Promise<void> => {
+  const [revenuePHP, revenueUSD, totalActivated, totalPending, byMethod] = await Promise.all([
+    PendingPayment.aggregate([
+      { $match: { status: 'activated', currency: 'PHP', amount: { $exists: true } } },
+      { $group: { _id: null, total: { $sum: '$amount' } } },
+    ]),
+    PendingPayment.aggregate([
+      { $match: { status: 'activated', currency: 'USD', amount: { $exists: true } } },
+      { $group: { _id: null, total: { $sum: '$amount' } } },
+    ]),
+    PendingPayment.countDocuments({ status: 'activated' }),
+    PendingPayment.countDocuments({ status: 'pending' }),
+    PendingPayment.aggregate([{ $group: { _id: '$paymentMethod', count: { $sum: 1 } } }]),
+  ]);
+
+  res.json({
+    success: true,
+    totalRevenuePHP: revenuePHP[0]?.total || 0,
+    totalRevenueUSD: revenueUSD[0]?.total || 0,
+    totalActivated,
+    totalPending,
+    gcashCount: (byMethod as any[]).find((b) => b._id === 'gcash')?.count || 0,
+    stripeCount: (byMethod as any[]).find((b) => b._id === 'stripe')?.count || 0,
+  });
+};
+
 export const getUsers = async (req: AuthRequest, res: Response): Promise<void> => {
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 10;

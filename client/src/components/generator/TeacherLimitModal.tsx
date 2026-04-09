@@ -25,7 +25,7 @@ const TeacherLimitModal: React.FC<TeacherLimitModalProps> = ({ isOpen, onClose }
   const handleNotify = async () => {
     setNotifying(true);
     try {
-      await notifyPayment();
+      await notifyPayment(1, settings?.monthlyPrice || 299, 'PHP');
       setNotified(true);
       toast.success("Thanks! We'll activate your account within 24 hours.");
     } catch (err: unknown) {

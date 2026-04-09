@@ -53,6 +53,11 @@ export interface IPendingPayment extends Document {
   status: 'pending' | 'activated' | 'rejected';
   activatedAt?: Date;
   activatedBy?: Types.ObjectId;
+  paymentMethod: 'gcash' | 'stripe';
+  amount?: number;
+  currency: 'PHP' | 'USD';
+  months?: number;
+  stripeSessionId?: string;
 }
 
 export interface AuthRequest extends Request {

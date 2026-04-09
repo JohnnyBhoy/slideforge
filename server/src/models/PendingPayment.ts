@@ -10,6 +10,11 @@ const PendingPaymentSchema = new Schema<IPendingPayment>(
     status: { type: String, enum: ['pending', 'activated', 'rejected'], default: 'pending' },
     activatedAt: { type: Date },
     activatedBy: { type: Schema.Types.ObjectId, ref: 'Admin' },
+    paymentMethod: { type: String, enum: ['gcash', 'stripe'], default: 'gcash' },
+    amount: { type: Number },
+    currency: { type: String, enum: ['PHP', 'USD'], default: 'PHP' },
+    months: { type: Number, default: 1 },
+    stripeSessionId: { type: String },
   },
   { timestamps: true }
 );

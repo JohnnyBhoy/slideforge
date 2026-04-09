@@ -41,6 +41,11 @@ export interface PendingPayment {
   submittedAt: string;
   status: 'pending' | 'activated' | 'rejected';
   activatedAt?: string;
+  paymentMethod?: 'gcash' | 'stripe';
+  amount?: number;
+  currency?: 'PHP' | 'USD';
+  months?: number;
+  stripeSessionId?: string;
 }
 
 export interface QuotaData {
@@ -63,4 +68,7 @@ export interface PaymentSettings {
   gcashAccountName: string;
   monthlyPrice: number;
   threeMonthPrice: number;
+  monthlyPriceUsd: number;
+  threeMonthPriceUsd: number;
+  lsEnabled: boolean;
 }

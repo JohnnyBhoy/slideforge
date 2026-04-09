@@ -1,6 +1,8 @@
 import { Router, RequestHandler } from 'express';
 import {
   getStats,
+  getDailyStats,
+  getPaymentStats,
   getUsers,
   getUserById,
   updateUserStatus,
@@ -21,6 +23,8 @@ const h = (fn: Function): RequestHandler => fn as RequestHandler;
 router.use(h(verifyToken), h(requireRole('admin')));
 
 router.get('/stats', h(getStats));
+router.get('/daily-stats', h(getDailyStats));
+router.get('/payment-stats', h(getPaymentStats));
 router.get('/users', h(getUsers));
 router.get('/users/:id', h(getUserById));
 router.put('/users/:id/status', h(updateUserStatus));

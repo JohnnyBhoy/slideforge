@@ -16,6 +16,7 @@ import generateRoutes from './routes/generate.routes';
 import adminRoutes from './routes/admin.routes';
 import notifyRoutes from './routes/notify.routes';
 import settingsRoutes from './routes/settings.routes';
+import lsRoutes from './routes/lemonsqueezy.routes';
 
 const app = express();
 
@@ -23,6 +24,10 @@ connectDB();
 initPassport();
 
 app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
+
+// LemonSqueezy webhook needs raw body — mount BEFORE express.json()
+app.use('/api/ls/webhook', express.raw({ type: 'application/json' }));
+
 app.use(express.json());
 app.use(morgan('dev'));
 app.use(passport.initialize());
@@ -30,7 +35,7 @@ app.use(passport.initialize());
 app.use('/files', express.static(path.join(__dirname, '../public/generated')));
 
 app.get('/api/health', (_req, res) => {
-  res.json({ success: true, message: 'Class Generator API is running' });
+  res.json({ success: true, message: 'SlideForge API is running' });
 });
 
 app.use('/api/auth', authRoutes);
@@ -38,6 +43,7 @@ app.use('/api/generate', generateRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/notify', notifyRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/ls', lsRoutes);
 
 app.use(errorHandler);
 

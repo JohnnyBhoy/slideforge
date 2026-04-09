@@ -9,6 +9,12 @@ export const notifyPayment = async (req: AuthRequest, res: Response): Promise<vo
     return;
   }
 
+  const { months = 1, amount, currency = 'PHP' } = req.body as {
+    months?: number;
+    amount?: number;
+    currency?: 'PHP' | 'USD';
+  };
+
   const existing = await PendingPayment.findOne({ userId: user._id, status: 'pending' });
   if (existing) {
     res.json({ success: true, message: 'You already have a pending payment notification.' });
@@ -19,6 +25,10 @@ export const notifyPayment = async (req: AuthRequest, res: Response): Promise<vo
     userId: user._id,
     email: user.email,
     name: user.name,
+    paymentMethod: 'gcash',
+    amount,
+    currency,
+    months,
   });
 
   res.json({ success: true, message: "Thanks! We'll activate your account within 24 hours." });

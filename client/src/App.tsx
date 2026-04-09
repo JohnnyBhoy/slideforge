@@ -14,6 +14,7 @@ import ManageUsers from './pages/admin/ManageUsers';
 import UserDetail from './pages/admin/UserDetail';
 import AllGenerations from './pages/admin/AllGenerations';
 import PendingPayments from './pages/admin/PendingPayments';
+import LSSuccess from './pages/StripeSuccess';
 
 const App: React.FC = () => {
   return (
@@ -23,6 +24,14 @@ const App: React.FC = () => {
           {/* Public */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/oauth-success" element={<OAuthSuccess />} />
+          <Route
+            path="/ls-success"
+            element={
+              <ProtectedRoute role="teacher">
+                <LSSuccess />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Teacher */}
           <Route
