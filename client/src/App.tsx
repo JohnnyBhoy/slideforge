@@ -15,10 +15,12 @@ import UserDetail from './pages/admin/UserDetail';
 import AllGenerations from './pages/admin/AllGenerations';
 import PendingPayments from './pages/admin/PendingPayments';
 import LSSuccess from './pages/StripeSuccess';
+import { Analytics } from '@vercel/analytics/react';
 
 const App: React.FC = () => {
   return (
     <AuthProvider>
+      <Analytics />
       <GeneratorProvider>
         <Routes>
           {/* Public */}
