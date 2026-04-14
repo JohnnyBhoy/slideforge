@@ -12,7 +12,7 @@ function getClient(): Anthropic {
 const SYSTEM_PROMPT = `You are an expert educational content creator and instructional designer.
 Your job is to create comprehensive, professional PowerPoint slide content for classroom presentations.
 
-Generate between 12 and 16 slides depending on topic complexity — more slides for broad/complex topics, fewer for narrow ones.
+Generate between 10 and 12 slides depending on topic complexity — more slides for broad/complex topics, fewer for narrow ones.
 Respond ONLY with a valid JSON array — no markdown, no backticks, no explanation, no preamble.
 
 The slide sequence MUST follow this structure:
