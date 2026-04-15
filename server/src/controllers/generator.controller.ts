@@ -9,121 +9,152 @@ import { AuthRequest } from '../types';
 const GUEST_LIMIT = parseInt(process.env.GUEST_FREE_LIMIT || '3', 10);
 const TEACHER_LIMIT = parseInt(process.env.TEACHER_FREE_LIMIT || '5', 10);
 
+const PPTX_MIME = 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+
+/** Stream a PPTX buffer directly to the response — no disk involved. */
+function streamPptx(res: Response, buffer: Buffer, fileName: string, headers: Record<string, string | number>) {
+  for (const [key, value] of Object.entries(headers)) {
+    res.setHeader(key, String(value));
+  }
+  res.setHeader('Content-Type', PPTX_MIME);
+  res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+  res.setHeader('Content-Length', buffer.length);
+  res.setHeader('Access-Control-Expose-Headers', 'X-Slides-Generated, X-Remaining-Tries, X-File-Name');
+  res.send(buffer);
+}
+
 export const generateGuest = async (req: Request, res: Response): Promise<void> => {
-  const guestId = req.headers['x-guest-id'] as string;
-  if (!guestId) {
-    res.status(400).json({ success: false, message: 'Guest ID required' });
-    return;
-  }
+  try {
+    const guestId = req.headers['x-guest-id'] as string;
+    if (!guestId) {
+      res.status(400).json({ success: false, message: 'Guest ID required' });
+      return;
+    }
 
-  const { topic, gradeLevel = 'Elementary' } = req.body;
-  if (!topic || !topic.trim()) {
-    res.status(400).json({ success: false, message: 'Topic is required' });
-    return;
-  }
+    const { topic, gradeLevel = 'Elementary' } = req.body;
+    if (!topic || !topic.trim()) {
+      res.status(400).json({ success: false, message: 'Topic is required' });
+      return;
+    }
 
-  let session = await GuestSession.findOne({ guestId });
-  if (!session) {
-    session = await GuestSession.create({ guestId, generationCount: 0 });
-  }
+    let session = await GuestSession.findOne({ guestId });
+    if (!session) {
+      session = await GuestSession.create({ guestId, generationCount: 0 });
+    }
 
-  if (session.generationCount >= GUEST_LIMIT) {
-    res.status(403).json({
-      success: false,
-      limitReached: true,
-      message: "You've used all 3 free tries. Sign in to get 5 more!",
+    if (session.generationCount >= GUEST_LIMIT) {
+      res.status(403).json({
+        success: false,
+        limitReached: true,
+        message: "You've used all 3 free tries. Sign in to get 5 more!",
+      });
+      return;
+    }
+
+    const slides = await generateSlides(topic.trim(), gradeLevel);
+    const { buffer, fileName } = await generatePptx(slides, topic.trim(), gradeLevel);
+
+    session.generationCount += 1;
+    session.lastUsed = new Date();
+    await session.save();
+
+    const remainingTries = GUEST_LIMIT - session.generationCount;
+
+    await Generation.create({
+      userId: null,
+      guestId,
+      topic: topic.trim(),
+      gradeLevel,
+      slideCount: slides.length,
+      filePath: '',
+      fileName,
     });
-    return;
+
+    streamPptx(res, buffer, fileName, {
+      'X-Slides-Generated': slides.length,
+      'X-Remaining-Tries': remainingTries,
+      'X-File-Name': fileName,
+    });
+  } catch (err) {
+    console.error('[generateGuest]', err);
+    res.status(500).json({ success: false, message: 'Failed to generate presentation. Please try again.' });
   }
-
-  const slides = await generateSlides(topic.trim(), gradeLevel);
-  const { filePath, fileName, fileUrl } = await generatePptx(slides, topic.trim(), gradeLevel);
-
-  await Generation.create({
-    userId: null,
-    guestId,
-    topic: topic.trim(),
-    gradeLevel,
-    slideCount: slides.length,
-    filePath,
-    fileName,
-  });
-
-  session.generationCount += 1;
-  session.lastUsed = new Date();
-  await session.save();
-
-  const remainingTries = GUEST_LIMIT - session.generationCount;
-  res.json({ success: true, fileUrl, fileName, slidesGenerated: slides.length, remainingTries });
 };
 
 export const generateAuth = async (req: AuthRequest, res: Response): Promise<void> => {
-  const { topic, gradeLevel = 'Elementary' } = req.body;
-  if (!topic || !topic.trim()) {
-    res.status(400).json({ success: false, message: 'Topic is required' });
-    return;
-  }
-
-  const user = await User.findById(req.user?._id || (req.user as { id?: string })?.id);
-  if (!user) {
-    res.status(404).json({ success: false, message: 'User not found' });
-    return;
-  }
-
-  if (!user.isActive) {
-    res.status(403).json({ success: false, message: 'Your account has been deactivated' });
-    return;
-  }
-
-  const now = new Date();
-  const isSubscribedActive = user.isSubscribed && user.subscriptionExpiry && user.subscriptionExpiry > now;
-
-  if (!isSubscribedActive && user.generationCount >= TEACHER_LIMIT) {
-    res.status(403).json({
-      success: false,
-      limitReached: true,
-      needsSubscription: true,
-      message: "You've used all 5 free generations. Subscribe via GCash to continue!",
-    });
-    return;
-  }
-
-  const slides = await generateSlides(topic.trim(), gradeLevel);
-  const { filePath, fileName, fileUrl } = await generatePptx(slides, topic.trim(), gradeLevel);
-
-  await Generation.create({
-    userId: user._id,
-    guestId: null,
-    topic: topic.trim(),
-    gradeLevel,
-    slideCount: slides.length,
-    filePath,
-    fileName,
-  });
-
-  if (!isSubscribedActive) {
-    user.generationCount += 1;
-    if (!user.billingCycleStart) {
-      user.billingCycleStart = now;
+  try {
+    const { topic, gradeLevel = 'Elementary' } = req.body;
+    if (!topic || !topic.trim()) {
+      res.status(400).json({ success: false, message: 'Topic is required' });
+      return;
     }
-    await user.save();
-  }
 
-  const remainingTries = isSubscribedActive ? null : TEACHER_LIMIT - user.generationCount;
-  res.json({ success: true, fileUrl, fileName, slidesGenerated: slides.length, remainingTries });
+    const user = await User.findById(req.user?._id || (req.user as { id?: string })?.id);
+    if (!user) {
+      res.status(404).json({ success: false, message: 'User not found' });
+      return;
+    }
+
+    if (!user.isActive) {
+      res.status(403).json({ success: false, message: 'Your account has been deactivated' });
+      return;
+    }
+
+    const now = new Date();
+    const isSubscribedActive = user.isSubscribed && user.subscriptionExpiry && user.subscriptionExpiry > now;
+
+    if (!isSubscribedActive && user.generationCount >= TEACHER_LIMIT) {
+      res.status(403).json({
+        success: false,
+        limitReached: true,
+        needsSubscription: true,
+        message: "You've used all 5 free generations. Subscribe via GCash to continue!",
+      });
+      return;
+    }
+
+    const slides = await generateSlides(topic.trim(), gradeLevel);
+    const { buffer, fileName } = await generatePptx(slides, topic.trim(), gradeLevel);
+
+    if (!isSubscribedActive) {
+      user.generationCount += 1;
+      if (!user.billingCycleStart) user.billingCycleStart = now;
+      await user.save();
+    }
+
+    const remainingTries = isSubscribedActive ? -1 : TEACHER_LIMIT - user.generationCount;
+
+    await Generation.create({
+      userId: user._id,
+      guestId: null,
+      topic: topic.trim(),
+      gradeLevel,
+      slideCount: slides.length,
+      filePath: '',
+      fileName,
+    });
+
+    streamPptx(res, buffer, fileName, {
+      'X-Slides-Generated': slides.length,
+      'X-Remaining-Tries': remainingTries,
+      'X-File-Name': fileName,
+    });
+  } catch (err) {
+    console.error('[generateAuth]', err);
+    res.status(500).json({ success: false, message: 'Failed to generate presentation. Please try again.' });
+  }
 };
 
 export const getHistory = async (req: AuthRequest, res: Response): Promise<void> => {
   const userId = req.user?._id || (req.user as { id?: string })?.id;
   const generations = await Generation.find({ userId }).sort({ createdAt: -1 });
-  const serverUrl = process.env.CLIENT_URL ? process.env.CLIENT_URL.replace('5173', '5000') : 'http://localhost:5000';
 
   const result = generations.map((g) => ({
     _id: g._id,
     topic: g.topic,
     gradeLevel: g.gradeLevel,
     fileName: g.fileName,
-    fileUrl: `${serverUrl}/files/${g.fileName}`,
+    fileUrl: null, // files are not persisted on ephemeral hosts
     slideCount: g.slideCount,
     createdAt: g.createdAt,
   }));

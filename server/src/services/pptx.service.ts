@@ -1,5 +1,4 @@
 import PptxGenJS from 'pptxgenjs';
-import path from 'path';
 import https from 'https';
 import http from 'http';
 import { SlideContent } from '../types';
@@ -646,7 +645,7 @@ export async function generatePptx(
   slides: SlideContent[],
   topic: string,
   gradeLevel: string
-): Promise<{ filePath: string; fileName: string; fileUrl: string }> {
+): Promise<{ buffer: Buffer; fileName: string }> {
   const pptx = new PptxGenJS();
   pptx.layout = 'LAYOUT_WIDE';
   pptx.author = 'SlideForge';
@@ -666,7 +665,6 @@ export async function generatePptx(
     } else if (t === 'summary') {
       buildSummarySlide(pptx, slide);
     } else {
-      // 'content' or anything else
       await buildContentSlide(pptx, slide, i, total);
     }
   }
@@ -674,9 +672,8 @@ export async function generatePptx(
   const slug = slugify(topic);
   const timestamp = Math.floor(Date.now() / 1000);
   const fileName = `${slug}-${timestamp}.pptx`;
-  const generatedDir = path.join(__dirname, '../../public/generated');
-  const filePath = path.join(generatedDir, fileName);
 
-  await pptx.writeFile({ fileName: filePath });
-  return { filePath, fileName, fileUrl: `/files/${fileName}` };
+  // Write to in-memory buffer — no disk I/O, works on ephemeral filesystems
+  const buffer = (await pptx.write({ outputType: 'nodebuffer' })) as Buffer;
+  return { buffer, fileName };
 }

@@ -7,13 +7,18 @@ interface DownloadCardProps {
   onGenerateAnother: () => void;
 }
 
-const serverUrl = import.meta.env.VITE_SERVER_URL || 'http://localhost:5000';
-
 const DownloadCard: React.FC<DownloadCardProps> = ({ result, onGenerateAnother }) => {
   const { remainingTries, isSubscribed } = useGenerator();
-  const fileUrl = result.fileUrl.startsWith('http')
-    ? result.fileUrl
-    : `${serverUrl}${result.fileUrl}`;
+
+  // fileUrl is a blob: URL created in generator.ts — clicking it re-triggers download
+  const handleDownload = () => {
+    const a = document.createElement('a');
+    a.href = result.fileUrl;
+    a.download = result.fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
 
   return (
     <div className="bg-white rounded-2xl shadow-lg overflow-hidden w-full max-w-2xl mx-auto mt-6">
@@ -34,13 +39,16 @@ const DownloadCard: React.FC<DownloadCardProps> = ({ result, onGenerateAnother }
           </div>
         </div>
 
-        <a
-          href={fileUrl}
-          download={result.fileName}
+        <button
+          onClick={handleDownload}
           className="flex items-center justify-center gap-3 w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-xl text-lg transition"
         >
           ⬇ Download PowerPoint (.pptx)
-        </a>
+        </button>
+
+        <p className="text-center text-xs text-slate-400">
+          File was downloaded automatically. Click above if it didn't start.
+        </p>
 
         {(isSubscribed || (remainingTries !== null && remainingTries > 0)) && (
           <button

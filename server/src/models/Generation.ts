@@ -8,7 +8,7 @@ const GenerationSchema = new Schema<IGeneration>(
     topic: { type: String, required: true },
     gradeLevel: { type: String, required: true },
     slideCount: { type: Number, required: true },
-    filePath: { type: String, required: true },
+    filePath: { type: String, default: '' },
     fileName: { type: String, required: true },
     downloadCount: { type: Number, default: 0 },
   },

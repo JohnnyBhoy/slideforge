@@ -34,14 +34,14 @@ const TopicForm: React.FC<TopicFormProps> = ({ onResult }) => {
 
     setIsGenerating(true);
     try {
-      let res;
+      let result;
       if (role === 'teacher') {
-        res = await generateAuth(topic.trim(), gradeLevel);
+        result = await generateAuth(topic.trim(), gradeLevel);
       } else {
-        res = await generateGuest(topic.trim(), gradeLevel);
+        result = await generateGuest(topic.trim(), gradeLevel);
       }
       await updateQuota();
-      onResult({ ...res.data, topic: topic.trim(), gradeLevel });
+      onResult({ ...result, topic: topic.trim(), gradeLevel });
       toast.success('Presentation generated successfully!');
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string; limitReached?: boolean } } };
