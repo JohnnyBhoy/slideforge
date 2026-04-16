@@ -115,30 +115,66 @@ Rules for ALL slides:
 - Summary bullets must recap the 4 most important concepts from the entire presentation
 - Cover the topic comprehensively with logical progression from introduction to advanced concepts`;
 
-export async function generateSlides(topic: string, gradeLevel: string): Promise<SlideContent[]> {
-  const response = await getClient().messages.create({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 8000,
-    system: SYSTEM_PROMPT,
-    messages: [
-      { role: 'user', content: `Topic: ${topic} | Grade Level: ${gradeLevel}` },
-    ],
-  });
+function extractJsonArray(raw: string): SlideContent[] | null {
+  // Strip all markdown code fences (```json ... ``` or ``` ... ```)
+  let text = raw.trim().replace(/^```[a-z]*\s*/i, '').replace(/\s*```\s*$/i, '').trim();
 
-  const block = response.content[0];
-  if (!block || block.type !== 'text') throw new Error('No content returned from Anthropic');
-
-  const cleaned = block.text.trim().replace(/^```json?\n?/, '').replace(/\n?```$/, '');
-  let slides: SlideContent[];
+  // Try direct parse first
   try {
-    slides = JSON.parse(cleaned);
-  } catch (e) {
-    throw new Error('Failed to parse JSON from Anthropic response: ' + e);
+    const parsed = JSON.parse(text);
+    if (Array.isArray(parsed)) return parsed as SlideContent[];
+  } catch { /* fall through */ }
+
+  // Find the first '[' and last ']' — extract the JSON array even if there's surrounding text
+  const start = text.indexOf('[');
+  const end = text.lastIndexOf(']');
+  if (start !== -1 && end !== -1 && end > start) {
+    try {
+      const parsed = JSON.parse(text.slice(start, end + 1));
+      if (Array.isArray(parsed)) return parsed as SlideContent[];
+    } catch { /* fall through */ }
   }
 
-  if (!Array.isArray(slides) || slides.length < 4) {
-    throw new Error('Invalid slide data returned from Anthropic');
+  return null;
+}
+
+export async function generateSlides(topic: string, gradeLevel: string): Promise<SlideContent[]> {
+  const MAX_ATTEMPTS = 2;
+
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    const response = await getClient().messages.create({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 8000,
+      system: SYSTEM_PROMPT,
+      messages: [
+        { role: 'user', content: `Topic: ${topic} | Grade Level: ${gradeLevel}` },
+      ],
+    });
+
+    const block = response.content[0];
+    if (!block || block.type !== 'text') {
+      console.error(`[anthropic] Attempt ${attempt}: no text block in response`);
+      continue;
+    }
+
+    const slides = extractJsonArray(block.text);
+
+    if (!slides || slides.length < 4) {
+      console.error(
+        `[anthropic] Attempt ${attempt}: invalid/short response (length=${slides?.length ?? 0}). ` +
+        `First 500 chars: ${block.text.slice(0, 500)}`
+      );
+      if (attempt === MAX_ATTEMPTS) {
+        throw new Error(
+          `Anthropic returned invalid slide data after ${MAX_ATTEMPTS} attempts. ` +
+          `Last response length: ${slides?.length ?? 0}`
+        );
+      }
+      continue;
+    }
+
+    return slides;
   }
 
-  return slides;
+  throw new Error('Failed to generate slides after all attempts');
 }
