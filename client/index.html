@@ -2,9 +2,143 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/slide_forge.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Slide Forge — Presentation Builder for Students & Teachers</title>
+
+    <!-- ═══════════════════════════════════════════════
+         PRIMARY SEO
+    ════════════════════════════════════════════════ -->
+    <title>SlideForge — AI-Powered PowerPoint Generator for Teachers & Students</title>
+
+    <meta name="description" content="SlideForge generates professional PowerPoint presentations in seconds using AI. Just type your topic, choose your grade level, and download a fully designed .pptx file — complete with content slides, quiz, and summary. Free for teachers and students." />
+
+    <meta name="keywords" content="AI presentation generator, PowerPoint generator, AI slideshow maker, teacher presentation tool, student presentation maker, generate PowerPoint from topic, AI pptx generator, classroom presentation AI, free presentation generator, SlideForge, lesson plan presentation, school project slideshow, AI education tool, auto slide maker, presentation for teachers, presentation for students, Google Slides alternative, pptx download free" />
+
+    <meta name="author" content="SlideForge" />
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow" />
+    <meta name="theme-color" content="#1d4ed8" />
+
+    <!-- Canonical -->
+    <link rel="canonical" href="https://slideforge-fawn.vercel.app/" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/slide_forge.png" />
+    <link rel="apple-touch-icon" href="/slide_forge.png" />
+
+    <!-- ═══════════════════════════════════════════════
+         OPEN GRAPH (Facebook / LinkedIn / Discord)
+    ════════════════════════════════════════════════ -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://slideforge-fawn.vercel.app/" />
+    <meta property="og:site_name" content="SlideForge" />
+    <meta property="og:title" content="SlideForge — AI-Powered PowerPoint Generator for Teachers & Students" />
+    <meta property="og:description" content="Generate professional PowerPoint presentations instantly with AI. Type your topic, pick a grade level, and get a fully designed .pptx — slides, quiz, and summary included. Free to try, no design skills needed." />
+    <meta property="og:image" content="https://slideforge-fawn.vercel.app/slide_forge.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="SlideForge — AI Presentation Generator" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- ═══════════════════════════════════════════════
+         TWITTER CARD
+    ════════════════════════════════════════════════ -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://slideforge-fawn.vercel.app/" />
+    <meta name="twitter:title" content="SlideForge — AI PowerPoint Generator for Teachers & Students" />
+    <meta name="twitter:description" content="Type a topic. Pick a grade level. Download a fully designed PowerPoint in seconds — powered by AI. Free for teachers and students." />
+    <meta name="twitter:image" content="https://slideforge-fawn.vercel.app/slide_forge.png" />
+
+    <!-- ═══════════════════════════════════════════════
+         JSON-LD STRUCTURED DATA
+    ════════════════════════════════════════════════ -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebApplication",
+          "@id": "https://slideforge-fawn.vercel.app/#app",
+          "name": "SlideForge",
+          "url": "https://slideforge-fawn.vercel.app",
+          "description": "AI-powered PowerPoint presentation generator for teachers and students. Enter a topic, choose a grade level, and receive a fully designed .pptx file in seconds.",
+          "applicationCategory": "EducationApplication",
+          "operatingSystem": "Web Browser",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "5 free presentations for guests, 10 free for registered teachers per billing cycle"
+          },
+          "featureList": [
+            "AI-generated slide content using Claude by Anthropic",
+            "Professional .pptx file download",
+            "Grade-level appropriate content (Kinder, Elementary, High School, College)",
+            "Includes knowledge quiz slide",
+            "Includes summary and key takeaways slide",
+            "Wikipedia-sourced images for each slide",
+            "Teacher history dashboard",
+            "Google OAuth sign-in"
+          ],
+          "screenshot": "https://slideforge-fawn.vercel.app/slide_forge.png",
+          "inLanguage": "en-US"
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://slideforge-fawn.vercel.app/#website",
+          "url": "https://slideforge-fawn.vercel.app",
+          "name": "SlideForge",
+          "description": "AI-powered PowerPoint generator for teachers and students",
+          "inLanguage": "en-US",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": {
+              "@type": "EntryPoint",
+              "urlTemplate": "https://slideforge-fawn.vercel.app/?topic={search_term_string}"
+            },
+            "query-input": "required name=search_term_string"
+          }
+        },
+        {
+          "@type": "FAQPage",
+          "@id": "https://slideforge-fawn.vercel.app/#faq",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "What is SlideForge?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "SlideForge is an AI-powered tool that generates professional PowerPoint presentations from any topic in seconds. It uses Claude AI to create grade-appropriate content and produces a downloadable .pptx file with a title slide, content slides, a quiz, and a summary."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Is SlideForge free to use?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. Guests can generate up to 5 presentations for free without creating an account. Teachers who sign in with Google get 10 free presentations per billing cycle."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What grade levels does SlideForge support?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "SlideForge supports Kinder, Elementary, High School, and College. The language, depth, and examples are automatically adjusted to match the selected level."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What format does SlideForge generate?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "SlideForge generates standard .pptx files compatible with Microsoft PowerPoint, Google Slides, and LibreOffice. Each file includes 12–16 slides with topic images, a knowledge quiz, and a summary."
+              }
+            }
+          ]
+        }
+      ]
+    }
+    </script>
   </head>
   <body>
     <div id="root"></div>

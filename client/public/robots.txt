@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /oauth-success
+
+Sitemap: https://slideforge-fawn.vercel.app/sitemap.xml
