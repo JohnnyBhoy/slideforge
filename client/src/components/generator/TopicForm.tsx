@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { toast } from 'react-toastify';
 import { useAuth } from '../../context/AuthContext';
 import { useGenerator } from '../../context/GeneratorContext';
 import { generateGuest, generateAuth } from '../../api/generator';
-import Loader from '../common/Loader';
 import { GenerationResult } from '../../types';
 
 const SAMPLE_TOPICS = [
@@ -14,6 +13,26 @@ const SAMPLE_TOPICS = [
 
 const GRADE_LEVELS = ['Kinder', 'Elementary', 'High School', 'College'];
 
+// Progress messages shown at key percentage milestones
+const PROGRESS_MESSAGES: { at: number; label: string }[] = [
+  { at: 0,  label: 'Starting generation…' },
+  { at: 15, label: 'Researching your topic…' },
+  { at: 30, label: 'Crafting slide content…' },
+  { at: 50, label: 'Building slide structure…' },
+  { at: 65, label: 'Adding key facts & quiz…' },
+  { at: 80, label: 'Designing layout…' },
+  { at: 90, label: 'Finalising presentation…' },
+  { at: 98, label: 'Almost ready…' },
+];
+
+function getCurrentMessage(pct: number): string {
+  let msg = PROGRESS_MESSAGES[0].label;
+  for (const m of PROGRESS_MESSAGES) {
+    if (pct >= m.at) msg = m.label;
+  }
+  return msg;
+}
+
 interface TopicFormProps {
   onResult: (result: GenerationResult & { topic: string; gradeLevel: string }) => void;
 }
@@ -23,16 +42,39 @@ const TopicForm: React.FC<TopicFormProps> = ({ onResult }) => {
   const { isGenerating, setIsGenerating, isLimitReached, updateQuota } = useGenerator();
   const [topic, setTopic] = useState('');
   const [gradeLevel, setGradeLevel] = useState('Elementary');
+  const [progress, setProgress] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Animated progress ticker — climbs to 95% over ~40s, then waits for real completion
+  const startProgress = () => {
+    setProgress(0);
+    // Each tick: +1% every 400ms, slows near 95 to avoid overshooting
+    timerRef.current = setInterval(() => {
+      setProgress(prev => {
+        if (prev >= 95) return prev;
+        const step = prev < 60 ? 2 : prev < 85 ? 1 : 0.3;
+        return Math.min(95, prev + step);
+      });
+    }, 400);
+  };
+
+  const finishProgress = () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    setProgress(100);
+    setTimeout(() => setProgress(0), 800);
+  };
+
+  useEffect(() => {
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!topic.trim()) {
-      toast.error('Please enter a topic');
-      return;
-    }
+    if (!topic.trim()) { toast.error('Please enter a topic'); return; }
     if (isLimitReached) return;
 
     setIsGenerating(true);
+    startProgress();
     try {
       let result;
       if (role === 'teacher') {
@@ -40,10 +82,12 @@ const TopicForm: React.FC<TopicFormProps> = ({ onResult }) => {
       } else {
         result = await generateGuest(topic.trim(), gradeLevel);
       }
+      finishProgress();
       await updateQuota();
       onResult({ ...result, topic: topic.trim(), gradeLevel });
       toast.success('Presentation generated successfully!');
     } catch (err: unknown) {
+      finishProgress();
       const error = err as { response?: { data?: { message?: string; limitReached?: boolean } } };
       if (error.response?.data?.limitReached) {
         await updateQuota();
@@ -97,13 +141,27 @@ const TopicForm: React.FC<TopicFormProps> = ({ onResult }) => {
           <span className="font-semibold text-slate-700">12–16 slides + quiz</span>
         </div>
 
+        {/* Generate button */}
         <button
           type="submit"
           disabled={isGenerating || isLimitReached || !topic.trim()}
-          className="w-full bg-gradient-to-r from-blue-700 to-blue-600 hover:from-blue-800 hover:to-blue-700 text-white font-bold py-4 rounded-xl text-lg transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          className="w-full bg-gradient-to-r from-blue-700 to-blue-600 hover:from-blue-800 hover:to-blue-700 text-white font-bold py-4 rounded-xl text-lg transition disabled:opacity-60 disabled:cursor-not-allowed overflow-hidden relative"
         >
           {isGenerating ? (
-            <Loader text="Generating your slides..." />
+            <div className="flex flex-col items-center gap-1.5 px-4">
+              {/* Percentage + message */}
+              <div className="flex items-center justify-between w-full text-sm">
+                <span className="opacity-90">{getCurrentMessage(progress)}</span>
+                <span className="font-bold tabular-nums">{Math.round(progress)}%</span>
+              </div>
+              {/* Progress bar */}
+              <div className="w-full h-2 bg-white/20 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-white rounded-full transition-all duration-500 ease-out"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+            </div>
           ) : (
             'Generate Presentation →'
           )}
@@ -111,7 +169,7 @@ const TopicForm: React.FC<TopicFormProps> = ({ onResult }) => {
 
         {!role && (
           <p className="text-center text-sm text-slate-500">
-            Sign in with Google after your free tries to unlock 5 more presentations
+            Sign in with Google after your free tries to unlock 10 more presentations
           </p>
         )}
       </form>

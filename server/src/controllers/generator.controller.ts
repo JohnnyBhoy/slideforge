@@ -6,8 +6,8 @@ import { generateSlides } from '../services/anthropic';
 import { generatePptx } from '../services/pptx.service';
 import { AuthRequest } from '../types';
 
-const GUEST_LIMIT = parseInt(process.env.GUEST_FREE_LIMIT || '3', 10);
-const TEACHER_LIMIT = parseInt(process.env.TEACHER_FREE_LIMIT || '5', 10);
+const GUEST_LIMIT = parseInt(process.env.GUEST_FREE_LIMIT || '5', 10);
+const TEACHER_LIMIT = parseInt(process.env.TEACHER_FREE_LIMIT || '10', 10);
 
 const PPTX_MIME = 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
 
@@ -46,7 +46,7 @@ export const generateGuest = async (req: Request, res: Response): Promise<void> 
       res.status(403).json({
         success: false,
         limitReached: true,
-        message: "You've used all 3 free tries. Sign in to get 5 more!",
+        message: "You've used all 5 free tries. Sign in to get 10 more!",
       });
       return;
     }
@@ -108,7 +108,7 @@ export const generateAuth = async (req: AuthRequest, res: Response): Promise<voi
         success: false,
         limitReached: true,
         needsSubscription: true,
-        message: "You've used all 5 free generations. Subscribe via GCash to continue!",
+        message: "You've used all 10 free generations. Subscribe via GCash to continue!",
       });
       return;
     }

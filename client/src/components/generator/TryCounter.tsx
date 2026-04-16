@@ -22,13 +22,14 @@ const TryCounter: React.FC<TryCounterProps> = ({ remainingTries, isSubscribed, r
   let label = '';
 
   if (role === 'teacher') {
-    if (remainingTries >= 5) colorClass = 'bg-green-100 text-green-700';
-    else if (remainingTries >= 3) colorClass = 'bg-yellow-100 text-yellow-700';
+    if (remainingTries >= 7) colorClass = 'bg-green-100 text-green-700';
+    else if (remainingTries >= 4) colorClass = 'bg-yellow-100 text-yellow-700';
     else if (remainingTries >= 1) colorClass = 'bg-orange-100 text-orange-700';
     else colorClass = 'bg-red-100 text-red-700';
     label = remainingTries > 0 ? `${remainingTries} tries remaining this month` : 'No tries left — subscribe to continue';
   } else {
-    if (remainingTries === 3) { colorClass = 'bg-green-100 text-green-700'; label = '✦ 3 free tries — no account needed'; }
+    if (remainingTries >= 4) { colorClass = 'bg-green-100 text-green-700'; label = `✦ ${remainingTries} free tries — no account needed`; }
+    else if (remainingTries === 3) { colorClass = 'bg-green-100 text-green-700'; label = '3 tries remaining'; }
     else if (remainingTries === 2) { colorClass = 'bg-yellow-100 text-yellow-700'; label = '2 tries remaining'; icon = '⚠'; }
     else if (remainingTries === 1) { colorClass = 'bg-orange-100 text-orange-700'; label = '1 try remaining — sign in for more'; icon = '!'; }
     else { colorClass = 'bg-red-100 text-red-700'; label = 'No tries left'; icon = '✕'; }
